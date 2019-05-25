@@ -1,6 +1,7 @@
 ﻿using Model;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,6 +18,7 @@ namespace Cliente
     public partial class Form1 : Form
     {
         Color contactos;
+        Hashtable emotions;
         static private NetworkStream stream;
         static private StreamWriter streamw;
         static private StreamReader streamr;
@@ -30,7 +32,7 @@ namespace Cliente
         }
 
         private void btnConecta_Click(object sender, EventArgs e)
-        {            
+        {
             btnConecta.Visible = false;
             btnEnvia.Visible = true;
             lblUsuario.Text = txtInformacion.Text;
@@ -102,23 +104,59 @@ namespace Cliente
 
         private void AddItem(Clientes s)
         {
-
             contactos = System.Drawing.ColorTranslator.FromHtml($"#{s.color}");
-            lstDatos.ForeColor = contactos;
-            lstDatos.Items.Add($"{s.nick}:{s.mensaje}");
-
+            lstDatos.SelectionColor = contactos;
+            lstDatos.SelectedText = $"{Environment.NewLine}{ s.nick}:{Environment.NewLine}{s.mensaje}";
         }
 
 
         private void BtnColor_Click(object sender, EventArgs e)
         {
-            ColorDialog MyDialog = new ColorDialog();
-            MyDialog.AllowFullOpen = false;
-            MyDialog.ShowHelp = true;
-
-            // Update the text box color if the user clicks OK 
-            if (MyDialog.ShowDialog() == DialogResult.OK)
-                usuarios.color = (MyDialog.Color.ToArgb() & 0x00FFFFFF).ToString("X6");
+            ColorDialog colorDialog = new ColorDialog();
+            colorDialog.AllowFullOpen = false;
+            colorDialog.ShowHelp = true;
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+                usuarios.color = (colorDialog.Color.ToArgb() & 0x00FFFFFF).ToString("X6");
         }
+
+        void Emotions()
+        {
+            emotions = new Hashtable(6);
+            emotions.Add(":)", Cliente.Properties.Resources._1f60a);
+            emotions.Add(":P", Cliente.Properties.Resources._1f60b);
+            emotions.Add("u_u", Cliente.Properties.Resources._1f60c);
+            emotions.Add("love", Cliente.Properties.Resources._1f60d);
+            emotions.Add("cool", Cliente.Properties.Resources._1f60e);
+            emotions.Add("kiss", Cliente.Properties.Resources._1f61a);
+            emotions.Add(";)", Cliente.Properties.Resources._1f60f);
+            emotions.Add(";P", Cliente.Properties.Resources._1f61c);
+            emotions.Add("XP", Cliente.Properties.Resources._1f61d);
+            emotions.Add(":(", Cliente.Properties.Resources._1f61e);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            Emotions();
+        }
+
+        private void LstDatos_TextChanged(object sender, EventArgs e)
+        {
+            AddEmotions();
+        }
+        private void AddEmotions()
+        {
+            foreach (string emote in emotions.Keys)
+            {
+                while (lstDatos.Text.Contains(emote))
+                {
+                    int ind = lstDatos.Text.IndexOf(emote);
+                    lstDatos.Select(ind, emote.Length);
+                    Clipboard.SetImage((Image)emotions[emote]);
+                    lstDatos.Paste();
+                }
+            }
+        }
+
+
     }
 }
